@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  bankingapp:
+    container_name: bankingapp-container
+    image: munevvernure/bankingapp:latest
+    ports:
+      - 8080:8080
+    depends_on:
+      - mysqldb
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysqldb:3306/devops
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=1234
+      - SPRING_JPA_HIBERNATE_DLL_AUTO=update
+    #entrypoint: [ "/bin/sh", "-c", "./wait-for-it.sh mysqldb:3306 -- java -jar /path/to/your/application.jar" ]
+
+    restart: always
+
+  mysqldb:
+    container_name: mysqldb
+    image: mysql
+    environment:
+      restart: always
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_DATABASE: devops
+    ports:
+      - 3306:3306
+    volumes:
+      - mysql-data:/var/lib/mysql
+
+volumes:
+  mysql-data:
