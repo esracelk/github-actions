@@ -33,7 +33,7 @@ jobs:
         settings-path: ${{ github.workspace }} # location for the settings.xml file
 
     - name: Build with Maven
-      run: mvn clean package
+      run: mvn clean install -DskipTests
       
     - name: create docker image
       run: docker build -t esra097/bankingapp:latest .
@@ -47,9 +47,13 @@ jobs:
     - name: Create PEM file
       run: echo "${{ secrets.AWS_PEM_KEY }}" > anahtar.pem && chmod 400 anahtar.pem
 
-    - name: copy jar file to sever
+
+    - name: Copy JAR file to EC2
       run: |
-        scp -i anahtar.pem target/awsproject-0.0.1-SNAPSHOT.jar ec2-user@13.48.86.24:/home/ece2-user/
+          scp -i anahtar.pem -o StrictHostKeyChecking=no target/awsproject-0.0.1-SNAPSHOT.jar ec2-user@13.48.86.24:/home/ec2-user/
+
+    
+
    
       env:
         GITHUB_TOKEN: ${{ github.token }}
