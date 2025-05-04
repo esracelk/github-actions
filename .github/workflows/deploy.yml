@@ -1,0 +1,55 @@
+# This workflow will build a package using Maven and then publish it to GitHub packages when a release is created
+# For more information see: https://github.com/actions/setup-java/blob/main/docs/advanced-usage.md#apache-maven-with-a-settings-path
+
+name: Maven Package
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [closed]
+    branches:
+      - main
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+    - name: clone repo
+      uses: actions/checkout@v4
+      
+    - name: Set up JDK 11
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
+        settings-path: ${{ github.workspace }} # location for the settings.xml file
+
+    - name: Build with Maven
+      run: mvn clean package
+      
+    - name: create docker image
+      run: docker build -t esra097/bankingapp:latest .
+
+    - name: login on Dockerhub
+      run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+
+    - name: push dockerhub
+      run: docker push esra097/bankingapp:latest
+      
+    - name: Create PEM file
+      run: echo "${{ secrets.AWS_PEM_KEY }}" > anahtar.pem && chmod 400 anahtar.pem
+
+    - name: copy jar file to sever
+      run: |
+        scp -i anahtar.pem target/awsproject-0.0.1-SNAPSHOT.jar ec2-user@13.48.86.24:/home/ece2-user/
+   
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
