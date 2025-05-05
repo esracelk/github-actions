@@ -50,7 +50,7 @@ jobs:
 
     - name: Copy JAR file to EC2
       run: |
-          scp -i anahtar.pem -o StrictHostKeyChecking=no target/awsproject-0.0.1-SNAPSHOT.jar ec2-user@13.48.86.24:/home/ec2-user/
+          scp -i anahtar.pem -o StrictHostKeyChecking=no target/awsproject-0.0.1-SNAPSHOT.jar ec2-user@13.50.233.169:/home/ec2-user/
 
     
 
